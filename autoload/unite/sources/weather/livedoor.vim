@@ -63,18 +63,18 @@ function! unite#sources#weather#livedoor#get_forecast(id)
     let json = webapi#json#decode(res.content)
 
     return {
-\     'status':     '200',
-\     'message':    '',
-\     'provider':   json.copyright.provider[0].name,
-\     'publisher':  json.copyright.image.title,
-\     'location':   json.location.city,
-\     'published':  json.description.publicTime,
-\     'title':      json.title,
-\     'descripton': substitute(json.description.text,"\n","","g"),
-\     'daily':  [
-\       s:get_forecast_daily(json, 'today'),
-\       s:get_forecast_daily(json, 'tomorrow')
-\     ],
+\     'status':      '200',
+\     'message':     '',
+\     'provider':    json.copyright.provider[0].name,
+\     'publisher':   json.copyright.image.title,
+\     'location':    json.location.city,
+\     'published':   json.description.publicTime,
+\     'title':       json.title,
+\     'description': substitute(json.description.text,"\n","","g"),
+\     'daily':  {
+\       'today':    s:get_forecast_daily(json, 'today'),
+\       'tomorrow': s:get_forecast_daily(json, 'tomorrow')
+\     },
 \   }
 
   endif
@@ -87,17 +87,17 @@ function! s:get_forecast_daily(json, day)
   let daily = {}
   let daily.title = f.dateLabel
   let daily.description = f.telop
-  let daily.parameters = []
+  let daily.temperature = {}
 
   if has_key(f, 'temperature')
     let temp = f.temperature
     for item in [{"key": "max", "title": "最高気温"}, {"key": "min", "title": "最低気温"}]
       if has_key(temp, item.key)
         if type(temp[item.key]) == type({}) && has_key(temp[item.key], 'celsius')
-          call add(daily.parameters, { 
+          let daily.temperature[item.key] = { 
 \           "title": item.title,
 \           "text":  temp[item.key].celsius . " 度"
-\         })
+\         }
         endif
       endif
     endfor
