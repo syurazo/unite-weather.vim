@@ -13,6 +13,8 @@ call unite#util#set_default(
 \ 'g:unite_weather_open', 'new')
 call unite#util#set_default(
 \ 'g:unite_weather_default_provider', 'livedoor')
+call unite#util#set_default(
+\ 'g:unite_weather_template_file', '')
 
 let s:source = {
 \  'name': 'weather',
@@ -80,24 +82,41 @@ function! unite#sources#weather#forecast(provider, id)
 
   nnoremap <silent> <buffer> q <C-w>c
 
-  let report = []
-  call add(report, "【" . forecast.publisher . "】")
-  call add(report, '')
-  call add(report, forecast.title)
-  call add(report, '')
-  call add(report, forecast.descripton)
+  if strlen(g:unite_weather_template_file) > 0
+    let template = readfile(g:unite_weather_template_file)
+  else
+    let template = s:default_template()
+  endif
 
-  for daily in forecast.daily
-    call add(report, '')
-    call add(report, daily.title . "の天気")
-    call add(report, "  " . daily.description)
-    for item in daily.parameters
-      call add(report, "  " . item.title . " " . item.text)
-    endfor
-  endfor
+  call append('$',s:fit_template(template, forecast))
 
-  call append('$',report)
+endfunction
 
+function! s:fit_template(template, vars)
+  let mark = '{{\([\[\]a-zA-Z0-9.]\+\)}}'
+  return map(copy(a:template), "
+  \ substitute(v:val, mark,
+  \  '\\=exists(''a:vars.'' . submatch(1)) ? eval(''a:vars.'' . submatch(1)) : '''' ', 'g')
+  \")
+endfunction
+
+function! s:default_template()
+    return [
+\     "【 {{publisher}} 】",
+\     "",
+\     "{{title}}",
+\     "",
+\     "{{description}}",
+\     "",
+\     "今日の天気",
+\     "{{daily.today.description}}",
+\     "最高気温 {{daily.today.temperature.max.text}} ／ 最低気温 {{daily.today.temperature.min.text}}",
+\     "",
+\     "明日の天気",
+\     "{{daily.tomorrow.description}}",
+\     "最高気温 {{daily.tomorrow.temperature.max.text}} ／ 最低気温 {{daily.tomorrow.temperature.min.text}}",
+\     ""
+\   ]
 endfunction
 
 let &cpo = s:save_cpo

@@ -59,3 +59,27 @@ unite-weather.vim は天気予報の API から天気予報を取得し表示す
 
  デフォルトは 'livedoor' が指定されている。
 
+### g:unite_weather_template_file
+
+ 天気予報の表示形式を記述したテンプレートファイルのファイル名を指定する。
+
+ デフォルトは '' が設定され、デフォルトテンプレートが使われる。
+
+## テンプレート
+
+ 表示するパラメタを {{ }} で括って記述する。
+
+      【 {{publisher}} 】
+      
+      {{title}}
+      
+      {{description}}
+      
+      今日の天気
+      {{daily.today.description}}
+      最高気温 {{daily.today.temperature.max.text}} ／ 最低気温 {{daily.today.temperature.min.tex
+      
+      明日の天気
+      {{daily.tomorrow.description}}
+      最高気温 {{daily.tomorrow.temperature.max.text}} ／ 最低気温 {{daily.tomorrow.temperature.m
+
